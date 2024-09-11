@@ -38,8 +38,8 @@ O Sistema de Gerenciamento de Acervo Bibliotecário (SGAB) é um software que te
       </a>
     </td>
     <td align="center">
-      <a href="">
-        <img src="" width="100px;" alt=""/><br>
+      <a href="https://github.com/TheFonci">
+        <img src="https://avatars.githubusercontent.com/u/115956936?v=4" width="100px;" alt=""/><br>
         <sub>
           <b>Andrews Ferreira</b>
         </sub>
