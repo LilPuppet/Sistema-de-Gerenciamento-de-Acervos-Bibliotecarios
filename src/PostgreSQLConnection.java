@@ -7,9 +7,9 @@ public class PostgreSQLConnection {
     private Connection connection; // Conectar o Banco 
 
 
-    private final String url = "jdbc:postgresql://salt.db.elephantsql.com:5432/pdhubmnq";
-    private final String username = "pdhubmnq";
-    private final String password = "5rvDta-Ic9bjXJzKgfP4MW5zFFhQwiw5";
+    private final String url = "jdbc:postgresql://localhost:5432/SGAB"; // Endereço local do banco "sgab"
+    private final String username = "postgres";
+    private final String password = "8740";
 
 
     // Cria uma conexão com o Banco de Dados
