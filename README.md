@@ -24,7 +24,7 @@ O Sistema de Gerenciamento de Acervo Bibliotecário (SGAB) é um software que te
 </table>
 
 ## Diagrama de Classes
-![Diagrama de Classes]()
+![Diagrama de Classes](https://github.com/LilPuppet/Sistema-de-Gerenciamento-de-Acervos-Bibliotecarios/blob/main/desc/Biblioteca.png)
 
 ## :handshake: Colaboradores
 <table align="center">
