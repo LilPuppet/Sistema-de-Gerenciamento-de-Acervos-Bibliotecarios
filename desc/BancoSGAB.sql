@@ -34,3 +34,9 @@ CREATE TABLE Emprestimo (
     FOREIGN KEY(idLivro) REFERENCES Livro(idLivro),
     FOREIGN KEY(cpf) REFERENCES Usuario(cpf)
 );
+
+ALTER TABLE livro
+ADD COLUMN dispAlunos BOOLEAN;
+
+ALTER TABLE usuario
+ADD COLUMN professor BOOLEAN;
