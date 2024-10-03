@@ -8,16 +8,16 @@ public class Adm extends Usuario {
     private int idAdm;
 
     public Adm(int idAdm, Usuario usuario) {
-        super(usuario.getCpf(), usuario.getNome(), usuario.getSenha(), usuario.getEmail(), usuario.getTelefone());
+        super(usuario.getCpf(), usuario.getNome(), usuario.getSenha(), usuario.getEmail(), usuario.getTelefone(), usuario.isProfessor());
         this.idAdm = idAdm;
     }
 
     public Adm(Usuario usuario) {
-        super(usuario.getCpf(), usuario.getNome(), usuario.getSenha(), usuario.getEmail(), usuario.getTelefone());
+        super(usuario.getCpf(), usuario.getNome(), usuario.getSenha(), usuario.getEmail(), usuario.getTelefone(), usuario.isProfessor());
     }
 
-    public Adm(String cpf, String nome, String senha, String email, String telefone) {
-        super(cpf, nome, senha, email, telefone);
+    public Adm(String cpf, String nome, String senha, String email, String telefone, boolean professor) {
+        super(cpf, nome, senha, email, telefone, professor);
     }
 
     /**
@@ -33,9 +33,10 @@ public class Adm extends Usuario {
         if (buscaUsuario(getCpf()) == null) {
             try {
                 super.criarConta();
-                String query = "INSERT INTO Adm (cpf) VALUES (?)";
+                String query = "INSERT INTO Adm (cpf) VALUES (?); UPDATE usuario SET professor = TRUE WHERE cpf IN (?)";
                 state = connection.prepareStatement(query);
                 state.setString(1, super.getCpf());
+                state.setString(2, super.getCpf());
                 state.executeUpdate();
                 System.out.println(" Adm Cadastrado! ");
             } catch (Exception e) {
@@ -51,9 +52,10 @@ public class Adm extends Usuario {
             }
         } else if (buscaUsuario(getCpf()) != null && buscaAdm(getCpf()) == null) {
             try {
-                String query = "INSERT INTO Adm (cpf) VALUES (?)";
+                String query = "INSERT INTO Adm (cpf) VALUES (?); UPDATE usuario SET professor = TRUE WHERE cpf IN (?)";
                 state = connection.prepareStatement(query);
                 state.setString(1, super.getCpf());
+                state.setString(2, super.getCpf());
                 state.executeUpdate();
                 System.out.println(" Adm Criado! ");
             } catch (Exception e) {

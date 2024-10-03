@@ -15,9 +15,10 @@ public class Livro {
     private String isbn;
     private int quantLivros;
     private int quantEmprestados;
+    private boolean dispAlunos;
 
     public Livro(int idLivro, String titulo, String genero, String autor, String dataPublicacao, String edicao,
-            String editora, String isbn,int quantLivros) {
+            String editora, String isbn,int quantLivros, boolean dispAlunos) {
         this.idLivro = idLivro;
         this.titulo = titulo;
         this.genero = genero;
@@ -27,10 +28,11 @@ public class Livro {
         this.editora = editora;
         this.isbn = isbn;
         this.quantLivros = quantLivros;
+        this.dispAlunos = dispAlunos;
     }
 
     public Livro(int idLivro, String titulo, String genero, String autor, Date dataPublicacao, String edicao,
-            String editora, String isbn, int quantLivros, int quantEmprestados) {
+            String editora, String isbn, int quantLivros, int quantEmprestados, boolean dispAlunos) {
         this.idLivro = idLivro;
         this.titulo = titulo;
         this.genero = genero;
@@ -41,6 +43,7 @@ public class Livro {
         this.isbn = isbn;
         this.quantLivros = quantLivros;
         this.quantEmprestados = quantEmprestados;
+        this.dispAlunos = dispAlunos;
     }
 
     /**
@@ -51,7 +54,7 @@ public class Livro {
         PreparedStatement state = null;
 
         try {
-            String query = "INSERT Into Livro (titulo, genero, autor, dataPublicacao, edicao, editora, isbn, quantLivros) VALUES  (?, ?, ?, ?, ?, ?, ?, ?)";
+            String query = "INSERT Into Livro (titulo, genero, autor, dataPublicacao, edicao, editora, isbn, quantLivros, dispAlunos) VALUES  (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             state = connection.prepareStatement(query);
             state.setString(1, titulo);
             state.setString(2, genero);
@@ -61,6 +64,7 @@ public class Livro {
             state.setString(6, editora);
             state.setString(7, isbn);
             state.setInt(8, quantLivros);
+            state.setBoolean(9, dispAlunos);
             state.executeUpdate();
             System.out.println(" Livro Cadastrado! ");
 
@@ -94,9 +98,17 @@ public class Livro {
             state.setInt(1, id); // preenche os ? com as informações desejadas
             result = state.executeQuery(); // recebe a tabela com as respostas da pesquisa
             if (result.next()) {// enquanto houverem respostas, imprima-as
-                return new Livro(result.getInt(1), result.getString(2), result.getString(3), result.getString(4),
-                        result.getDate(5), result.getString(6), result.getString(7), result.getString(8),
-                        result.getInt(9), result.getInt(10));
+                return new Livro(result.getInt(1), 
+                    result.getString(2), 
+                    result.getString(3), 
+                    result.getString(4),
+                    result.getDate(5), 
+                    result.getString(6), 
+                    result.getString(7), 
+                    result.getString(8),
+                    result.getInt(9), 
+                    result.getInt(10), 
+                    result.getBoolean(11));
             }
         } catch (Exception e) {// se der erro, mostre qual foi
             System.out.println(e);
@@ -145,7 +157,8 @@ public class Livro {
                         result.getString("Editora"),
                         result.getString("ISBN"),
                         result.getInt("quantLivros"),
-                        result.getInt("quantEmprestados"));
+                        result.getInt("quantEmprestados"),
+                        result.getBoolean("dispAlunos"));
 
                 livrosEncontrados.add(livro);
             }
@@ -191,7 +204,8 @@ public class Livro {
                         result.getString("Editora"),
                         result.getString("ISBN"),
                         result.getInt("quantLivros"),
-                        result.getInt("quantEmprestados"));
+                        result.getInt("quantEmprestados"),
+                        result.getBoolean("dispAlunos"));
                 listaLivro.add(livro);
             }
             return listaLivro;
@@ -319,7 +333,7 @@ public class Livro {
         return "\n Livro: " + titulo + "\n Id: " + idLivro + "\n Autor: " + autor + "\n Gênero: " + genero +
                 "\n Data da Publicação: " + dataPublicacao + "\n Edição: " + edicao + "\n Editora: " +
                 editora + "\n ISBN: " + isbn + "\n Quantidade de Livros: " + quantLivros + 
-                "\n Quantidade Emprestada: "+ quantEmprestados;
+                "\n Quantidade Emprestada: "+ quantEmprestados + "\n Disponivel para alunos: "+ dispAlunos;
     }
 
     /**
@@ -417,4 +431,153 @@ public class Livro {
         this.quantEmprestados = quantEmprestados;
     }
 
+    public boolean isDispAlunos() {
+        return dispAlunos;
+    }
+
+    public void setDispAlunos(boolean dispAlunos) {
+        this.dispAlunos = dispAlunos;
+    }
+
+    //METODOS NOVOS PÓS ALTERAÇÕES NO LIVRO
+
+
+    public static ArrayList<Livro> pesquisarLivroAluno(String pesquisa) {
+        Connection connection = PostgreSQLConnection.getInstance().getConnection();
+        PreparedStatement state = null; // cria o state, aquele que executa a pesquisa
+        ResultSet result = null;
+        ArrayList<Livro> livrosEncontrados = new ArrayList<>();
+
+        try {
+            // Seleciona tudo (*) na tabela Livro onde o a pesquisa é igual a recebida
+            String query = "SELECT * FROM Livro WHERE dispAlunos = true AND (titulo like ? OR genero like ? OR autor like ?)"; // cria a query,
+                                                                                                       // que é a
+                                                                                                       // pesquisa que
+                                                                                                       // iremos fazer
+            state = connection.prepareStatement(query);
+            state.setString(1, "%" + pesquisa + "%");
+            state.setString(2, "%" + pesquisa + "%");
+            state.setString(3, "%" + pesquisa + "%");
+            result = state.executeQuery();
+
+            while (result.next()) {
+                // Para cada registro encontrado, cria um objeto Livro e adiciona na Arraylist
+                Livro livro = new Livro(
+                        result.getInt("idLivro"),
+                        result.getString("Titulo"),
+                        result.getString("Genero"),
+                        result.getString("Autor"),
+                        result.getDate("DataPublicacao"),
+                        result.getString("Edicao"),
+                        result.getString("Editora"),
+                        result.getString("ISBN"),
+                        result.getInt("quantLivros"),
+                        result.getInt("quantEmprestados"),
+                        result.getBoolean("dispAlunos"));
+
+                livrosEncontrados.add(livro);
+            }
+            return livrosEncontrados;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (result != null) {
+                    result.close();
+                }
+                if (state != null) {
+                    state.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public static ArrayList<Livro> listarLivrosAlunos() {
+        Connection connection = PostgreSQLConnection.getInstance().getConnection();
+        PreparedStatement state = null; // cria o state, aquele que executa a pesquisa
+        ResultSet result = null;
+        ArrayList<Livro> listaLivro = new ArrayList<>();
+
+        try {
+            // Seleciona tudo (*) na tabela Livro onde o título é igual ao recebido
+            String query = "SELECT * FROM Livro WHERE dispAlunos = true"; // cria a query, que é a pesquisa que iremos fazer
+            state = connection.prepareStatement(query);
+            result = state.executeQuery();
+
+            while (result.next()) {
+                // Para cada registro encontrado, cria um objeto Livro e adiciona na Arraylist
+                Livro livro = new Livro(
+                        result.getInt("idLivro"),
+                        result.getString("Titulo"),
+                        result.getString("Genero"),
+                        result.getString("Autor"),
+                        result.getDate("DataPublicacao"),
+                        result.getString("Edicao"),
+                        result.getString("Editora"),
+                        result.getString("ISBN"),
+                        result.getInt("quantLivros"),
+                        result.getInt("quantEmprestados"),
+                        result.getBoolean("dispAlunos"));
+                listaLivro.add(livro);
+            }
+            return listaLivro;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (result != null) {
+                    result.close();
+                }
+                if (state != null) {
+                    state.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public static Livro buscaLivroIdAluno(int id) { // Usado pelos administradores, para alteração, Arraylistagem e remoção
+        Connection connection = PostgreSQLConnection.getInstance().getConnection();
+        PreparedStatement state = null;
+        ResultSet result = null;
+
+        try {// se a conexão funcionar
+            String query = "Select * from livro where idLivro = ? AND dispAlunos = true"; // cria a query, que é a pesquisa que iremos fazer
+            state = connection.prepareStatement(query); // cria o state, aquele que executa a pesquisa
+            state.setInt(1, id); // preenche os ? com as informações desejadas
+            result = state.executeQuery(); // recebe a tabela com as respostas da pesquisa
+            if (result.next()) {// enquanto houverem respostas, imprima-as
+                return new Livro(result.getInt(1), 
+                    result.getString(2), 
+                    result.getString(3), 
+                    result.getString(4),
+                    result.getDate(5), 
+                    result.getString(6), 
+                    result.getString(7), 
+                    result.getString(8),
+                    result.getInt(9), 
+                    result.getInt(10), 
+                    result.getBoolean(11));
+            }
+        } catch (Exception e) {// se der erro, mostre qual foi
+            System.out.println(e);
+        } finally {
+            try {
+                if (result != null) {
+                    result.close();
+                }
+                if (state != null) {
+                    state.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
 }

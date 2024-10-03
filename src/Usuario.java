@@ -8,6 +8,7 @@ public class Usuario {
     private String senha;
     private String email;
     private String telefone;
+    private boolean professor;
 
     /**
      * Construtor da classe Usuario, ele recebe os dados e usa os set's pra checar
@@ -19,12 +20,13 @@ public class Usuario {
      * @param email
      * @param telefone
      */
-    public Usuario(String cpf, String nome, String senha, String email, String telefone) {
+    public Usuario(String cpf, String nome, String senha, String email, String telefone, boolean professor) {
         setCpf(cpf);
         setNome(nome);
         setSenha(senha);
         setEmail(email);
         setTelefone(telefone);
+        setProfessor(professor);
     }
 
     /**
@@ -41,13 +43,14 @@ public class Usuario {
             try {
 
                 // Insere o usuário na tabela Usuario
-                String query = "INSERT Into usuario (cpf, nome, senha, email, telefone) VALUES (?, ?, ?, ?, ?)";
+                String query = "INSERT Into usuario (cpf, nome, senha, email, telefone, professor) VALUES (?, ?, ?, ?, ?, ?)";
                 state = connection.prepareStatement(query);
                 state.setString(1, cpf);
                 state.setString(2, nome);
                 state.setString(3, senha);
                 state.setString(4, email);
                 state.setString(5, telefone);
+                state.setBoolean(6, professor);
                 state.executeUpdate();
 
                 // Insere os telefones dele na tabela Telefone com base em seu cpf
@@ -92,7 +95,7 @@ public class Usuario {
             // Retorna o usuário
             if (result.next()) {
                 return new Usuario(result.getString(1), result.getString(2), result.getString(3), result.getString(4),
-                        result.getString(5));
+                        result.getString(5), result.getBoolean(6));
             }
 
         } catch (SQLException e) {
@@ -267,7 +270,8 @@ public class Usuario {
                         result.getString(2),
                         result.getString(3),
                         result.getString(4),
-                        result.getString(5));
+                        result.getString(5),
+                        result.getBoolean(6));
                 usuarios.add(user);
             }
             return usuarios;
@@ -333,6 +337,10 @@ public class Usuario {
             System.out.println("O valor de telefone não pode ser null");
     }
 
+    public boolean isProfessor() {
+        return professor;
+    }
+
     public String getCpf() {
         return cpf;
     }
@@ -353,6 +361,10 @@ public class Usuario {
         return telefone;
     }
 
+    public void setProfessor(boolean professor) {
+        this.professor = professor;
+    }
+
     @Override
     public String toString() {
         return " Nome: " + nome + "\n Cpf: " + cpf + "\n Email: " + email + "\n Telefone: " + telefone;
@@ -360,6 +372,7 @@ public class Usuario {
 
     public String mostrarPerfil() {
         return " Nome: " + nome + "\n Cpf: " + cpf + "\n Email: " + email + "\n Senha: " + senha + "\n Telefone: "
-                + telefone;
+                + telefone + "\n Professor: "+ professor;
     }
+
 }

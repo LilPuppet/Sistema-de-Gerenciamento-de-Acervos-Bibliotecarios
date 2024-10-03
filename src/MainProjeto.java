@@ -121,6 +121,7 @@ public class MainProjeto {
                     case 1:
                         String nome = null, cpf = null, email = null, senha = null, senhaConfirma = null,
                                 telefone = null;
+                        boolean professor = false; // Variável para armazenar se o usuário é professor
                         do {
                             LimpaTela();
                             System.out.println(" < Cadastro >");
@@ -154,9 +155,17 @@ public class MainProjeto {
                                                 telefone = sc.nextLine();
                                             } else {
                                                 System.out.println(" Telefone: " + telefone);
+                                                
+                                                // Pergunta se o usuário é professor
+                                                System.out.print(" Você é professor? (1 -> Sim, 2 -> Não): ");
+                                                int isProfessor = Integer.valueOf(sc.nextLine());
+                                                if (isProfessor == 1) {
+                                                    professor = true;
+                                                }
+    
                                                 System.out.print(" Cadastrar Conta (1 -> Sim, 2 - > Não): ");
                                                 if (Integer.valueOf(sc.nextLine()) == 1) {
-                                                    Usuario usuario = new Usuario(cpf, nome, senha, email, telefone);
+                                                    Usuario usuario = new Usuario(cpf, nome, senha, email, telefone, professor);
                                                     usuario.criarConta();
                                                 }
                                                 System.out.print(" Aperte Enter para Continuar! ");
@@ -174,10 +183,10 @@ public class MainProjeto {
                         return;
                 }
             } catch (NumberFormatException e) {
+                // Lidar com exceções se necessário
             }
-
         } while (!sair);
-    }
+    }    
 
     /**
      * Menu de Usuário, para onde você vem depois de logar, aqui você pode
@@ -212,7 +221,11 @@ public class MainProjeto {
                         LimpaTela();
                         System.out.println(" < Pesquisar Livros > ");
                         System.out.print(" > ");
-                        listaLivro = Livro.pesquisarLivro(sc.nextLine());
+                        if (usuario.isProfessor()) { // Supondo que haja um método isProfessor()
+                            listaLivro = Livro.pesquisarLivro(sc.nextLine()); // Professores podem usar o método geral
+                        } else {
+                            listaLivro = Livro.pesquisarLivroAluno(sc.nextLine()); // Alunos usam o método específico para livros disponíveis
+                        }
                         if (listaLivro.size() != 0) {
                             for (int i = 0; i < listaLivro.size(); i++) {
                                 System.out.println(listaLivro.get(i).toString() + "\n");
@@ -229,8 +242,14 @@ public class MainProjeto {
                         System.out.println(" < Realizar Emprestimo >");
                         System.out.print(" id do Livro: ");
                         idLivro = Integer.valueOf(sc.nextLine());
-                        if (Livro.buscaLivroId(idLivro) != null) {
-                            Livro livro = Livro.buscaLivroId(idLivro);
+                        Livro livro;
+                        if (usuario.isProfessor()) { // Professores usam a busca geral
+                            livro = Livro.buscaLivroId(idLivro);
+                        } else { // Alunos só podem buscar livros disponíveis para alunos
+                            livro = Livro.buscaLivroIdAluno(idLivro);
+                        }
+
+                        if (livro != null) {
                             System.out.println(livro.toString());
                             System.out.print(" Continuar (1 -> Sim, 2 -> Não): ");
                             if (Integer.valueOf(sc.nextLine()) == 1) {
@@ -575,6 +594,7 @@ public class MainProjeto {
                 String nome = null, cpf = null, email = null, senha = null, senhaConfirma = null, telefone = null;
                 Usuario usuario = null;
                 Adm adm = null;
+                boolean professor = false;
 
                 switch (Integer.valueOf(sc.nextLine())) {
 
@@ -632,11 +652,12 @@ public class MainProjeto {
                                                                 telefone = sc.nextLine();
                                                             } else {
                                                                 System.out.println(" Telefone: " + telefone);
+                                                                professor = true;
                                                                 System.out.print(
                                                                         " Cadastrar Conta (1 -> Sim, 2 - > Não): ");
                                                                 if (Integer.valueOf(sc.nextLine()) == 1) {
                                                                     adm = new Adm(cpf, nome, senha, email,
-                                                                            telefone);
+                                                                            telefone, professor);
                                                                     adm.criarAdm();
                                                                 }
                                                                 System.out.print(" Aperte Enter para Continuar! ");
@@ -663,6 +684,7 @@ public class MainProjeto {
                                                 if (Integer.valueOf(sc.nextLine()) == 1) {
                                                     Usuario user = Usuario.buscaUsuario(cpf);
                                                     adm = new Adm(user);
+                                                    adm.setProfessor(true);
                                                     adm.criarAdm();
                                                 } else
                                                     break;
@@ -713,11 +735,18 @@ public class MainProjeto {
                                                         telefone = sc.nextLine();
                                                     } else {
                                                         System.out.println(" Telefone: " + telefone);
+                                                        
+                                                        // Pergunta se o usuário é professor
+                                                        System.out.print(" Você é professor? (1 -> Sim, 2 -> Não): ");
+                                                        int isProfessor = Integer.valueOf(sc.nextLine());
+                                                        if (isProfessor == 1) {
+                                                            professor = true;
+                                                        }
                                                         System.out.print(
                                                                 " Cadastrar Conta (1 -> Sim, 2 - > Não): ");
                                                         if (Integer.valueOf(sc.nextLine()) == 1) {
                                                             usuario = new Usuario(cpf, nome, senha, email,
-                                                                    telefone);
+                                                                    telefone, professor);
                                                             usuario.criarConta();
                                                         }
                                                         System.out.print(" Aperte Enter para Continuar! ");
@@ -984,6 +1013,7 @@ public class MainProjeto {
                     edicao = null, editora = null, isbn = null;
             int quantLivros = 0, idLivro = 0;
             Livro livro = null;
+            boolean dispAlunos;
             ArrayList<Livro> listaLivro = new ArrayList<>();
 
             try {
@@ -1042,12 +1072,16 @@ public class MainProjeto {
                                                             quantLivros = Integer.valueOf(sc.nextLine());
                                                         } else {
                                                             System.out.println(" Quantidade de Livros: " + quantLivros);
+                                                            System.out.print(" O livro será disponível para alunos? (1 -> Sim, 2 -> Não): ");
+                                                            int disposicao = Integer.valueOf(sc.nextLine());
+                                                            dispAlunos = (disposicao == 1);
+
                                                             System.out.print(
                                                                     " Cadastrar Livro (1 -> Sim, 2 - > Não): ");
                                                             if (Integer.valueOf(sc.nextLine()) == 1) {
                                                                 livro = new Livro(quantLivros, titulo, genero, autor,
                                                                         dataPublicacao, edicao, editora, isbn,
-                                                                        quantLivros);
+                                                                        quantLivros, dispAlunos);
                                                                 livro.cadastrarLivro();
                                                             }
                                                             System.out.print(" Aperte Enter para Continuar! ");
